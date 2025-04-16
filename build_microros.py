@@ -177,8 +177,8 @@ list(APPEND PYTHON_PREFIX_PATH "{output_dir / 'dev_ws' / 'install' / 'lib' / f'p
 list(JOIN CMAKE_PREFIX_PATH ":" AMENT_PREFIX_PATH)
 list(JOIN PYTHON_PREFIX_PATH ":" PYTHONPATH)
 
-set(ENV{{"AMENT_PREFIX_PATH"}} "${{AMENT_PREFIX_PATH}}")
-set(ENV{{"PYTHONPATH"}} "${{PYTHONPATH}}")
+set(ENV{{AMENT_PREFIX_PATH}} "${{AMENT_PREFIX_PATH}}")
+set(ENV{{PYTHONPATH}} "${{PYTHONPATH}}")
     """
         )
 
