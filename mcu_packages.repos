@@ -1,0 +1,80 @@
+repositories:
+
+  ros2/common_interfaces:
+    type: git
+    url: https://github.com/ros2/common_interfaces.git
+    version: 5.3.6
+  ros2/rclc:
+    type: git
+    url: https://github.com/bjsowa/rclc
+    version: 06f5f2c
+  ros2/rcl_interfaces:
+    type: git
+    url: https://github.com/ros2/rcl_interfaces.git
+    version: 2.0.2
+  ros2/rcl_logging:
+    type: git
+    url: https://github.com/ros2/rcl_logging.git
+    version: 3.1.1
+  ros2/rmw:
+    type: git
+    url: https://github.com/ros2/rmw.git
+    version: 7.3.2
+  ros2/rmw_implementation:
+    type: git
+    url: https://github.com/ros2/rmw_implementation.git
+    version: 2.15.5
+  ros2/ros2_tracing:
+    type: git
+    url: https://github.com/ros2/ros2_tracing.git
+    version: 8.2.3
+  ros2/rosidl:
+    type: git
+    url: https://github.com/ros2/rosidl.git
+    version: 4.6.5
+  ros2/rosidl_core:
+    type: git
+    url: https://github.com/ros2/rosidl_core.git
+    version: 0.2.0
+  ros2/rosidl_defaults:
+    type: git
+    url: https://github.com/ros2/rosidl_defaults.git
+    version: 1.6.0
+  ros2/rosidl_dynamic_typesupport:
+    type: git
+    url: https://github.com/ros2/rosidl_dynamic_typesupport
+    version: 0.1.2
+  ros2/unique_identifier_msgs:
+    type: git
+    url: https://github.com/ros2/unique_identifier_msgs.git
+    version: 2.5.0
+
+  eProsima/Micro-CDR:
+    type: git
+    url: https://github.com/eProsima/Micro-CDR.git
+    version: v2.0.1
+  eProsima/Micro-XRCE-DDS-Client:
+    type: git
+    url: https://github.com/eProsima/Micro-XRCE-DDS-Client.git
+    version: v2.4.3
+
+  uros/rcl:
+    type: git
+    url: https://github.com/fictionlab/rcl.git
+    version: eacfc85
+  uros/rcutils:
+    type: git
+    url: https://github.com/fictionlab/rcutils.git
+    version: 9b5bd96
+  uros/rmw_microxrcedds:
+    type: git
+    url: https://github.com/micro-ROS/rmw-microxrcedds.git
+    version: 5.0.1
+  uros/rosidl_typesupport:
+    type: git
+    url: https://github.com/fictionlab/rosidl_typesupport.git
+    version: 23f15cd
+  uros/rosidl_typesupport_microxrcedds:
+    type: git
+    url: https://github.com/micro-ROS/rosidl_typesupport_microxrcedds.git
+    version: 5.0.1
