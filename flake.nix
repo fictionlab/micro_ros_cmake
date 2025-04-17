@@ -21,7 +21,7 @@
 
       in {
         devShells.default = pkgs.mkShellNoCC {
-          # PYTHONPATH = "${poetry-env}/lib/python3.12/site-packages";
+          PYTHONPATH = "${poetry-env}/lib/python3.12/site-packages";
           packages = [ poetry-env ];
         };
         formatter = pkgs.nixfmt-classic;
