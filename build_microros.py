@@ -29,10 +29,17 @@ def main():
         default=str(Path(__file__).resolve().parent / "build"),
         help="Output directory for build artifacts",
     )
+    parser.add_argument(
+        "-t",
+        "--toolchain-file",
+        default=None,
+        help="Path to custom toolchain file",
+    )
     args = parser.parse_args()
 
     project_dir = Path(__file__).resolve().parent
     output_dir = Path(args.output_dir).resolve()
+    toolchain_file = Path(args.toolchain_file).resolve() if args.toolchain_file else None
 
     build_type = "Debug" if args.debug else "Release"
     verbose_makefile = "ON" if args.verbose else "OFF"
@@ -46,7 +53,14 @@ def main():
     build_dev_ws(project_dir, output_dir, build_type, verbose_makefile, event_handlers)
 
     print("--> Building mcu_ws...")
-    build_mcu_ws(project_dir, output_dir, build_type, verbose_makefile, event_handlers)
+    build_mcu_ws(
+        project_dir,
+        output_dir,
+        build_type,
+        verbose_makefile,
+        event_handlers,
+        toolchain_file,
+    )
 
     print("--> Generating CMake config...")
     generate_cmake_config(output_dir)
@@ -80,7 +94,14 @@ def build_dev_ws(project_dir, output_dir, build_type, verbose_makefile, event_ha
     subprocess.run(colcon_build_cmd, check=True)
 
 
-def build_mcu_ws(project_dir, output_dir, build_type, verbose_makefile, event_handlers):
+def build_mcu_ws(
+    project_dir,
+    output_dir,
+    build_type,
+    verbose_makefile,
+    event_handlers,
+    toolchain_file=None,
+):
     mcu_ws_dir = output_dir / "mcu_ws"
     os.makedirs(mcu_ws_dir / "src", exist_ok=True)
     os.chdir(mcu_ws_dir)
@@ -127,7 +148,6 @@ def build_mcu_ws(project_dir, output_dir, build_type, verbose_makefile, event_ha
     ]
 
     colcon_meta_path = project_dir / "colcon.meta"
-    toolchain_path = project_dir / "toolchain.cmake"
     dev_ws_install_dir = output_dir / "dev_ws" / "install"
 
     os.environ["AMENT_PREFIX_PATH"] = str(dev_ws_install_dir)
@@ -159,7 +179,10 @@ def build_mcu_ws(project_dir, output_dir, build_type, verbose_makefile, event_ha
         "-DBUILD_TESTING=OFF",
         f"-DCMAKE_BUILD_TYPE={build_type}",
         f"-DCMAKE_VERBOSE_MAKEFILE={verbose_makefile}",
-        f"-DCMAKE_TOOLCHAIN_FILE={toolchain_path}",
+    ]
+    if toolchain_file:
+        colcon_build_cmd.append(f"-DCMAKE_TOOLCHAIN_FILE={toolchain_file}")
+    colcon_build_cmd += [
         "--packages-ignore",
         *colcon_ignore_packages,
     ]
