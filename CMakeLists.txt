@@ -5,16 +5,32 @@ project(micro_ros_cmake)
 set(MICRO_ROS_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/micro_ros")
 set(MICRO_ROS_CONFIG_FILE "${MICRO_ROS_OUTPUT_DIR}/micro_ros_cmakeConfig.cmake")
 
-# Allow the parent project to override the toolchain file
-set(MICRO_ROS_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/toolchain.cmake" CACHE FILEPATH "Toolchain file for Micro-ROS")
+set(MICRO_ROS_TOOLCHAIN_FILE "" CACHE FILEPATH "Toolchain file for Micro-ROS")
+set(MICRO_ROS_VERBOSE_BUILD OFF CACHE BOOL "Verbose output for Micro-ROS build")
+
+if (${MICRO_ROS_TOOLCHAIN_FILE} STREQUAL "")
+    message(ERROR "No toolchain file specified. Please set the MICRO_ROS_TOOLCHAIN_FILE variable.")
+else()
+    message(STATUS "Using toolchain file: ${MICRO_ROS_TOOLCHAIN_FILE}")
+    list(APPEND BUILD_SCRIPT_ARGS "-t" "${MICRO_ROS_TOOLCHAIN_FILE}")
+endif()
+
+if (${MICRO_ROS_VERBOSE_BUILD})
+    message(STATUS "Verbose build enabled.")
+    list(APPEND BUILD_SCRIPT_ARGS "-v")
+else()
+    message(STATUS "Verbose build disabled.")
+endif()
+
+unset(ENV{CC})
+unset(ENV{CXX})
 
 if(NOT EXISTS "${MICRO_ROS_CONFIG_FILE}")
     message(STATUS "Generating Micro-ROS libraries and configuration...")
     execute_process(
         COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/build_microros.py
                 --output-dir ${MICRO_ROS_OUTPUT_DIR}
-                --toolchain-file ${MICRO_ROS_TOOLCHAIN_FILE}
-                -v
+                ${BUILD_SCRIPT_ARGS}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         RESULT_VARIABLE result
     )
