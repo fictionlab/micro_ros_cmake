@@ -88,6 +88,8 @@ def build_dev_ws(project_dir, output_dir, build_type, verbose_makefile, event_ha
         event_handlers,
         "--cmake-args",
         "-DBUILD_TESTING=OFF",
+        "-DCAKE_C_COMPILER=gcc",
+        "-DCMAKE_CXX_COMPILER=c++",
         f"-DCMAKE_BUILD_TYPE={build_type}",
         f"-DCMAKE_VERBOSE_MAKEFILE={verbose_makefile}",
     ]
