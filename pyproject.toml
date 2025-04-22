@@ -1,11 +1,7 @@
-[tool.poetry]
+[project]
 name = "micro_ros_cmake"
-package-mode = false
+version = "0.1.0"
 
-[tool.poetry.dependencies]
-python = ">=3.12"
-argcomplete = "3.2.3"
-colcon-common-extensions = "^0.3.0"
-colcon-core = "0.16.1"
-vcstool = "^0.3.0"
-lark = "^1.2.2"
+requires-python = ">=3.12"
+
+dependencies = ["colcon-common-extensions", "vcstool", "lark"]
