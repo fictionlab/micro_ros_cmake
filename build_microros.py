@@ -35,11 +35,18 @@ def main():
         default=None,
         help="Path to custom toolchain file",
     )
+    parser.add_argument(
+        "-m",
+        "--colcon-meta",
+        default=None,
+        help="Path to custom colcon.meta file",
+    )
     args = parser.parse_args()
 
     project_dir = Path(__file__).resolve().parent
     output_dir = Path(args.output_dir).resolve()
     toolchain_file = Path(args.toolchain_file).resolve() if args.toolchain_file else None
+    colcon_meta_file = Path(args.colcon_meta).resolve() if args.colcon_meta else None
 
     build_type = "Debug" if args.debug else "Release"
     verbose_makefile = "ON" if args.verbose else "OFF"
@@ -60,6 +67,7 @@ def main():
         verbose_makefile,
         event_handlers,
         toolchain_file,
+        colcon_meta_file,
     )
 
     print("--> Generating CMake config...")
@@ -103,6 +111,7 @@ def build_mcu_ws(
     verbose_makefile,
     event_handlers,
     toolchain_file=None,
+    colcon_meta_file=None,
 ):
     mcu_ws_dir = output_dir / "mcu_ws"
     os.makedirs(mcu_ws_dir / "src", exist_ok=True)
@@ -148,7 +157,10 @@ def build_mcu_ws(
         "tracetools_trace",
     ]
 
-    colcon_meta_path = project_dir / "colcon.meta"
+    project_colcon_meta = project_dir / "colcon.meta"
+    metas = [str(project_colcon_meta)]
+    if colcon_meta_file:
+        metas.append(str(colcon_meta_file))
     dev_ws_install_dir = output_dir / "dev_ws" / "install"
 
     os.environ["AMENT_PREFIX_PATH"] = str(dev_ws_install_dir)
@@ -171,7 +183,7 @@ def build_mcu_ws(
         "build",
         "--merge-install",
         "--metas",
-        str(colcon_meta_path),
+        *metas,
         "--event-handlers",
         event_handlers,
         "--cmake-args",
