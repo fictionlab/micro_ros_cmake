@@ -178,6 +178,7 @@ def build_mcu_ws(
         "--no-warn-unused-cli",
         "-DBUILD_SHARED_LIBS=OFF",
         "-DBUILD_TESTING=OFF",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
         f"-DCMAKE_BUILD_TYPE={build_type}",
         f"-DCMAKE_VERBOSE_MAKEFILE={verbose_makefile}",
     ]
