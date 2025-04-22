@@ -41,12 +41,23 @@ def main():
         default=None,
         help="Path to custom colcon.meta file",
     )
+    parser.add_argument(
+        "-e",
+        "--extra-packages",
+        default=None,
+        help="Path to repos file with extra packages to import",
+    )
     args = parser.parse_args()
 
     project_dir = Path(__file__).resolve().parent
     output_dir = Path(args.output_dir).resolve()
-    toolchain_file = Path(args.toolchain_file).resolve() if args.toolchain_file else None
+    toolchain_file = (
+        Path(args.toolchain_file).resolve() if args.toolchain_file else None
+    )
     colcon_meta_file = Path(args.colcon_meta).resolve() if args.colcon_meta else None
+    extra_packages_file = (
+        Path(args.extra_packages).resolve() if args.extra_packages else None
+    )
 
     build_type = "Debug" if args.debug else "Release"
     verbose_makefile = "ON" if args.verbose else "OFF"
@@ -68,6 +79,7 @@ def main():
         event_handlers,
         toolchain_file,
         colcon_meta_file,
+        extra_packages_file,
     )
 
     print("--> Generating CMake config...")
@@ -112,6 +124,7 @@ def build_mcu_ws(
     event_handlers,
     toolchain_file=None,
     colcon_meta_file=None,
+    extra_packages_file=None,
 ):
     mcu_ws_dir = output_dir / "mcu_ws"
     os.makedirs(mcu_ws_dir / "src", exist_ok=True)
@@ -125,6 +138,21 @@ def build_mcu_ws(
         "src",
     ]
     subprocess.run(vcs_import_cmd, check=True)
+
+    if extra_packages_file:
+        extra_src_dir = mcu_ws_dir / "src" / "extra"
+        os.makedirs(extra_src_dir, exist_ok=True)
+        print(
+            f"--> Importing extra repos from {extra_packages_file} into {extra_src_dir} ..."
+        )
+        vcs_import_extra_cmd = [
+            "vcs",
+            "import",
+            "--input",
+            extra_packages_file,
+            str(extra_src_dir),
+        ]
+        subprocess.run(vcs_import_extra_cmd, check=True)
 
     colcon_ignore_packages = [
         "lttngpy",

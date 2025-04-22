@@ -7,6 +7,7 @@ set(MICRO_ROS_CONFIG_FILE "${MICRO_ROS_OUTPUT_DIR}/micro_ros_cmakeConfig.cmake")
 
 set(MICRO_ROS_TOOLCHAIN_FILE "" CACHE FILEPATH "Toolchain file for Micro-ROS")
 set(MICRO_ROS_COLCON_META_FILE "" CACHE FILEPATH "Colcon meta file for Micro-ROS")
+set(MICRO_ROS_EXTRA_PACKAGES_FILE "" CACHE FILEPATH "Extra packages file for Micro-ROS")
 set(MICRO_ROS_VERBOSE_BUILD OFF CACHE BOOL "Verbose output for Micro-ROS build")
 
 if (${MICRO_ROS_TOOLCHAIN_FILE} STREQUAL "")
@@ -21,6 +22,13 @@ if (${MICRO_ROS_COLCON_META_FILE} STREQUAL "")
 else()
     message(STATUS "Using colcon meta file: ${MICRO_ROS_COLCON_META_FILE}")
     list(APPEND BUILD_SCRIPT_ARGS "-m" "${MICRO_ROS_COLCON_META_FILE}")
+endif()
+
+if (${MICRO_ROS_EXTRA_PACKAGES_FILE} STREQUAL "")
+    message(STATUS "No extra packages file specified. Using default.")
+else()
+    message(STATUS "Using extra packages file: ${MICRO_ROS_EXTRA_PACKAGES_FILE}")
+    list(APPEND BUILD_SCRIPT_ARGS "-e" "${MICRO_ROS_EXTRA_PACKAGES_FILE}")
 endif()
 
 if (${MICRO_ROS_VERBOSE_BUILD})
