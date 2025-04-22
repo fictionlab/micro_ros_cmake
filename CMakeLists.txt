@@ -25,12 +25,16 @@ endif()
 unset(ENV{CC})
 unset(ENV{CXX})
 
+set(MICRO_ROS_BUILD_COMMAND
+    python3 ${CMAKE_CURRENT_SOURCE_DIR}/build_microros.py
+    --output-dir ${MICRO_ROS_OUTPUT_DIR}
+    ${BUILD_SCRIPT_ARGS}
+)
+
 if(NOT EXISTS "${MICRO_ROS_CONFIG_FILE}")
     message(STATUS "Generating Micro-ROS libraries and configuration...")
     execute_process(
-        COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/build_microros.py
-                --output-dir ${MICRO_ROS_OUTPUT_DIR}
-                ${BUILD_SCRIPT_ARGS}
+        COMMAND ${MICRO_ROS_BUILD_COMMAND}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         RESULT_VARIABLE result
     )
@@ -42,6 +46,13 @@ if(NOT EXISTS "${MICRO_ROS_CONFIG_FILE}")
 else()
     message(STATUS "Micro-ROS libraries and configuration already exist. Skipping generation.")
 endif()
+
+add_custom_target(rebuild_micro_ros
+    COMMAND ${MICRO_ROS_BUILD_COMMAND}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    USES_TERMINAL
+    COMMENT "Force rebuilding Micro-ROS libraries and configuration"
+)
 
 list(APPEND CMAKE_PREFIX_PATH "${MICRO_ROS_OUTPUT_DIR}")
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" CACHE STRING "Modified prefix path" FORCE)
