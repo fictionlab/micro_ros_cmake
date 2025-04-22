@@ -122,7 +122,6 @@ def build_mcu_ws(
         "rcl_lifecycle",
         "rcl_logging_noop",
         "rcl_logging_spdlog",
-        "rcl_yaml_param_parser",
         "rclc_examples",
         "rclc_lifecycle",
         "ros2trace",
