@@ -4,4 +4,4 @@ version = "0.1.0"
 
 requires-python = ">=3.12"
 
-dependencies = ["colcon-common-extensions", "vcstool", "lark"]
+dependencies = ["colcon-common-extensions", "vcstool", "lark", "empy<4"]
