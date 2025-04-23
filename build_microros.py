@@ -155,10 +155,10 @@ def build_mcu_ws(
         subprocess.run(vcs_import_extra_cmd, check=True)
 
     colcon_ignore_packages = [
-        "lttngpy",
         "rcl_lifecycle",
         "rcl_logging_noop",
         "rcl_logging_spdlog",
+        "rcl_yaml_param_parser",
         "rclc_examples",
         "rclc_lifecycle",
         "ros2trace",
@@ -172,11 +172,9 @@ def build_mcu_ws(
         "rosidl_typesupport_microxrcedds_cpp",
         "rosidl_typesupport_microxrcedds_c_tests",
         "rosidl_typesupport_microxrcedds_test_msg",
-        "rosidl_typesupport_tests",
         "sensor_msgs_py",
         "test_msgs",
         "test_rmw_implementation",
-        "test_ros2trace",
         "test_tracetools",
         "test_tracetools_launch",
         "tracetools_launch",
