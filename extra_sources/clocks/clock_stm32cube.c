@@ -17,6 +17,7 @@
 #endif
 
 #define GETTICK_ROLLOVER_USECONDS 4294967296000UL
+#define NANOSECONDS_PER_MICROSECOND (1000LL)
 
 int clock_gettime(int unused, struct timespec *tp) {
   (void)unused;
@@ -33,6 +34,16 @@ int clock_gettime(int unused, struct timespec *tp) {
       ((uint64_t)m) * 1000UL + rollover * GETTICK_ROLLOVER_USECONDS;
   tp->tv_sec = real_us / 1000000;
   tp->tv_nsec = (real_us % 1000000) * 1000;
+
+  return 0;
+}
+
+int gettimeofday(struct timeval *tv, void * __tz) {
+  struct timespec tp;
+  clock_gettime(0, &tp);
+
+  tv->tv_sec = tp.tv_sec;
+  tv->tv_usec = (suseconds_t)(tp.tv_nsec / NANOSECONDS_PER_MICROSECOND);
 
   return 0;
 }
