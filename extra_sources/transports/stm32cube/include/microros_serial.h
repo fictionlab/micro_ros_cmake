@@ -21,7 +21,7 @@
 extern "C" {
 #endif
 
-typedef struct DMAStream {
+typedef struct microros_serial_dma_stream_s {
   /// UART handle to use for transport.
   UART_HandleTypeDef* uart;
 
@@ -36,13 +36,14 @@ typedef struct DMAStream {
 
   /// Pointer to transmit buffer.
   uint8_t* tbuffer;
-} DMAStream;
+} microros_serial_dma_stream_t;
 
-void microros_set_serial_transport(DMAStream* stream);
+void microros_set_serial_transport(microros_serial_dma_stream_t* stream);
 
 /// This function should be called from HAL_UART_TxCpltCallback. Otherwise the
 /// transform won't work properly.
-void microros_uart_transfer_complete_callback(DMAStream* stream);
+void microros_uart_transfer_complete_callback(
+    microros_serial_dma_stream_t* stream);
 
 #ifdef __cplusplus
 }

@@ -10,7 +10,7 @@ static uint16_t rhead, rtail;
 static volatile uint16_t thead, thead_next, ttail;
 static uint32_t open_count = 0;
 
-static void stream_flush(DMAStream *stream) {
+static void stream_flush(microros_serial_dma_stream_t *stream) {
   static volatile bool mutex = false;
 
   if ((stream->uart->gState == HAL_UART_STATE_READY) && !mutex) {
@@ -27,7 +27,8 @@ static void stream_flush(DMAStream *stream) {
 }
 
 static bool transport_open(struct uxrCustomTransport *transport) {
-  DMAStream *stream = (DMAStream *)transport->args;
+  microros_serial_dma_stream_t *stream =
+      (microros_serial_dma_stream_t *)transport->args;
 
   if (open_count == 0) {
     rhead = rtail = thead = thead_next = ttail = 0;
@@ -39,7 +40,8 @@ static bool transport_open(struct uxrCustomTransport *transport) {
 }
 
 static bool transport_close(struct uxrCustomTransport *transport) {
-  DMAStream *stream = (DMAStream *)transport->args;
+  microros_serial_dma_stream_t *stream =
+      (microros_serial_dma_stream_t *)transport->args;
 
   open_count--;
   if (open_count == 0) {
@@ -54,7 +56,8 @@ static size_t transport_write(struct uxrCustomTransport *transport,
                               uint8_t *errcode) {
   (void)errcode;
 
-  DMAStream *stream = (DMAStream *)transport->args;
+  microros_serial_dma_stream_t *stream =
+      (microros_serial_dma_stream_t *)transport->args;
 
   uint16_t n = len;
   uint16_t buffer_available =
@@ -81,7 +84,8 @@ static size_t transport_read(struct uxrCustomTransport *transport, uint8_t *buf,
                              size_t len, int timeout, uint8_t *errcode) {
   (void)errcode;
 
-  DMAStream *stream = (DMAStream *)transport->args;
+  microros_serial_dma_stream_t *stream =
+      (microros_serial_dma_stream_t *)transport->args;
 
   int ms_used = 0;
   while (true) {
@@ -104,12 +108,13 @@ static size_t transport_read(struct uxrCustomTransport *transport, uint8_t *buf,
   return wrote;
 }
 
-void microros_set_serial_transport(struct DMAStream *stream) {
+void microros_set_serial_transport(microros_serial_dma_stream_t *stream) {
   rmw_uros_set_custom_transport(true, stream, transport_open, transport_close,
                                 transport_write, transport_read);
 }
 
-void microros_uart_transfer_complete_callback(DMAStream *stream) {
+void microros_uart_transfer_complete_callback(
+    microros_serial_dma_stream_t *stream) {
   thead = thead_next;
   stream_flush(stream);
 }

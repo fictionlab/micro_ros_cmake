@@ -17,32 +17,34 @@
 #define MICROROS_HEAP_SIZE 20000
 #endif
 
-typedef struct UrosHeapBlock {
+typedef struct microros_heap_block_s {
   size_t start;
   size_t size;
-  struct UrosHeapBlock *prev;
-  struct UrosHeapBlock *next;
+  struct microros_heap_block_s *prev;
+  struct microros_heap_block_s *next;
   bool allocated;
-} __attribute__((aligned(MICROROS_HEAP_MEMORY_ALIGNMENT))) UrosHeapBlock;
+}
+__attribute__((aligned(MICROROS_HEAP_MEMORY_ALIGNMENT))) microros_heap_block_t;
 
-_Static_assert(sizeof(UrosHeapBlock) < MICROROS_HEAP_SIZE,
+_Static_assert(sizeof(microros_heap_block_t) < MICROROS_HEAP_SIZE,
                "Heap size is too small to fit a single block");
 
-typedef struct UrosHeapState {
+typedef struct microros_heap_state_s {
   uint8_t heap[MICROROS_HEAP_SIZE];
-  UrosHeapBlock *first_block;
-  UrosHeapBlock *last_block;
+  microros_heap_block_t *first_block;
+  microros_heap_block_t *last_block;
   size_t block_count;
-} UrosHeapState;
+} microros_heap_state_t;
 
-static UrosHeapState heap_state;
+static microros_heap_state_t heap_state;
 
-static void uros_heap_state_init() {
-  heap_state.first_block = (UrosHeapBlock *)heap_state.heap;
+__attribute__((constructor)) static void microros_heap_state_init() {
+  heap_state.first_block = (microros_heap_block_t *)heap_state.heap;
   heap_state.last_block = heap_state.first_block;
   heap_state.block_count = 1;
-  heap_state.first_block->start = sizeof(UrosHeapBlock);
-  heap_state.first_block->size = MICROROS_HEAP_SIZE - sizeof(UrosHeapBlock);
+  heap_state.first_block->start = sizeof(microros_heap_block_t);
+  heap_state.first_block->size =
+      MICROROS_HEAP_SIZE - sizeof(microros_heap_block_t);
   heap_state.first_block->prev = NULL;
   heap_state.first_block->next = NULL;
   heap_state.first_block->allocated = false;
@@ -58,11 +60,11 @@ static void uros_heap_state_init() {
  * @param size The new size of the first block. Must be smaller than the current
  * size of the block minus the size of the block header.
  */
-static void split_block(UrosHeapBlock *block, size_t size) {
-  UrosHeapBlock *new_block =
-      (UrosHeapBlock *)(heap_state.heap + block->start + size);
-  new_block->start = block->start + size + sizeof(UrosHeapBlock);
-  new_block->size = block->size - size - sizeof(UrosHeapBlock);
+static void split_block(microros_heap_block_t *block, size_t size) {
+  microros_heap_block_t *new_block =
+      (microros_heap_block_t *)(heap_state.heap + block->start + size);
+  new_block->start = block->start + size + sizeof(microros_heap_block_t);
+  new_block->size = block->size - size - sizeof(microros_heap_block_t);
   new_block->prev = block;
   new_block->next = block->next;
   new_block->allocated = false;
@@ -87,9 +89,9 @@ static void split_block(UrosHeapBlock *block, size_t size) {
  *
  * @param block The block to be combined with adjacent free blocks.
  */
-static void combine_free_blocks(UrosHeapBlock *block) {
+static void combine_free_blocks(microros_heap_block_t *block) {
   if (block->prev != NULL && !block->prev->allocated) {
-    block->prev->size += block->size + sizeof(UrosHeapBlock);
+    block->prev->size += block->size + sizeof(microros_heap_block_t);
     block->prev->next = block->next;
     if (block->next != NULL) {
       block->next->prev = block->prev;
@@ -103,7 +105,7 @@ static void combine_free_blocks(UrosHeapBlock *block) {
     heap_state.block_count--;
   }
   if (block->next != NULL && !block->next->allocated) {
-    block->size += block->next->size + sizeof(UrosHeapBlock);
+    block->size += block->next->size + sizeof(microros_heap_block_t);
     block->next = block->next->next;
     if (block->next != NULL) {
       block->next->prev = block;
@@ -121,8 +123,8 @@ static void combine_free_blocks(UrosHeapBlock *block) {
  * @return UrosHeapBlock* The block that corresponds to the pointer, or NULL if
  * not found.
  */
-static UrosHeapBlock *find_block(void *pointer) {
-  UrosHeapBlock *block = heap_state.first_block;
+static microros_heap_block_t *find_block(void *pointer) {
+  microros_heap_block_t *block = heap_state.first_block;
   while (block != NULL) {
     if ((void *)(heap_state.heap + block->start) == pointer) {
       return block;
@@ -141,11 +143,11 @@ void *microros_allocate(size_t size, void *state) {
   }
 
   // Find a free block that fits the requested size
-  UrosHeapBlock *block = heap_state.first_block;
+  microros_heap_block_t *block = heap_state.first_block;
   while (block != NULL) {
     if (!block->allocated && block->size >= size) {
       // Split the block if it's possible
-      if (size + sizeof(UrosHeapBlock) < block->size) {
+      if (size + sizeof(microros_heap_block_t) < block->size) {
         split_block(block, size);
       }
       block->allocated = true;
@@ -167,7 +169,7 @@ void microros_deallocate(void *pointer, void *state) {
   }
 
   // Find the block that corresponds to the pointer
-  UrosHeapBlock *block = find_block(pointer);
+  microros_heap_block_t *block = find_block(pointer);
   if (block == NULL) {
 #if MICROROS_ALLOCATOR_FAIL_FAST
     microros_allocator_fail("No block found for the pointer");
@@ -194,7 +196,7 @@ void *microros_reallocate(void *pointer, size_t size, void *state) {
   }
 
   // Find the block that corresponds to the pointer
-  UrosHeapBlock *block = find_block(pointer);
+  microros_heap_block_t *block = find_block(pointer);
   if (block == NULL) {
 #if MICROROS_ALLOCATOR_FAIL_FAST
     microros_allocator_fail("Invalid pointer");
@@ -211,7 +213,7 @@ void *microros_reallocate(void *pointer, size_t size, void *state) {
 
   if (size <= block->size) {
     // Split the block if possible
-    if (size + sizeof(UrosHeapBlock) < block->size) {
+    if (size + sizeof(microros_heap_block_t) < block->size) {
       split_block(block, size);
       combine_free_blocks(block->next);
     }
@@ -255,15 +257,10 @@ __attribute__((weak)) void microros_allocator_fail(const char *msg) {
 }
 
 bool microros_is_heap_empty() {
-  UrosHeapBlock *block = heap_state.first_block;
+  microros_heap_block_t *block = heap_state.first_block;
   return !block->allocated && block->next == NULL;
 }
 
 void microros_reset_heap_state() {
-  uros_heap_state_init();
-}
-
-// Call this at startup to initialize the heap state
-__attribute__((constructor)) static void microros_heap_init() {
-  uros_heap_state_init();
+  microros_heap_state_init();
 }
