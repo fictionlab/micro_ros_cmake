@@ -256,11 +256,11 @@ __attribute__((weak)) void microros_allocator_fail(const char *msg) {
   (void)msg;
 }
 
-bool microros_is_heap_empty() {
+bool microros_heap_is_empty() {
   microros_heap_block_t *block = heap_state.first_block;
   return !block->allocated && block->next == NULL;
 }
 
-void microros_reset_heap_state() {
+void microros_heap_reset_state() {
   microros_heap_state_init();
 }
