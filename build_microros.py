@@ -42,6 +42,11 @@ def main():
         help="Path to custom colcon.meta file",
     )
     parser.add_argument(
+        "--mcu-packages",
+        default=None,
+        help="Path to custom mcu_packages.repos file",
+    )
+    parser.add_argument(
         "-e",
         "--extra-packages",
         action="append",
@@ -56,6 +61,11 @@ def main():
         Path(args.toolchain_file).resolve() if args.toolchain_file else None
     )
     colcon_meta_file = Path(args.colcon_meta).resolve() if args.colcon_meta else None
+    mcu_packages_file = (
+        Path(args.mcu_packages).resolve()
+        if args.mcu_packages
+        else project_dir / "mcu_packages.repos"
+    )
     extra_packages_files = (
         [Path(f).resolve() for f in args.extra_packages]
         if args.extra_packages
@@ -83,6 +93,7 @@ def main():
         toolchain_file,
         colcon_meta_file,
         extra_packages_files,
+        mcu_packages_file,
     )
 
     print("--> Generating CMake config...")
@@ -128,6 +139,7 @@ def build_mcu_ws(
     toolchain_file=None,
     colcon_meta_file=None,
     extra_packages_files=None,
+    mcu_packages_file=None,
 ):
     mcu_ws_dir = output_dir / "mcu_ws"
     os.makedirs(mcu_ws_dir / "src", exist_ok=True)
@@ -137,7 +149,7 @@ def build_mcu_ws(
         "vcs",
         "import",
         "--input",
-        str(project_dir / "mcu_packages.repos"),
+        str(mcu_packages_file),
         "src",
     ]
     subprocess.run(vcs_import_cmd, check=True)
@@ -171,6 +183,7 @@ def build_mcu_ws(
                 subprocess.run(vcs_import_extra_cmd, check=True)
 
     colcon_ignore_packages = [
+        "lttngpy",
         "rcl_lifecycle",
         "rcl_logging_noop",
         "rcl_logging_spdlog",
@@ -232,7 +245,6 @@ def build_mcu_ws(
         "--no-warn-unused-cli",
         "-DBUILD_SHARED_LIBS=OFF",
         "-DBUILD_TESTING=OFF",
-        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON",
         f"-DCMAKE_BUILD_TYPE={build_type}",
         f"-DCMAKE_VERBOSE_MAKEFILE={verbose_makefile}",
     ]
