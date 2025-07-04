@@ -64,7 +64,7 @@ def main():
 
     build_type = "Debug" if args.debug else "Release"
     verbose_makefile = "ON" if args.verbose else "OFF"
-    event_handlers = "console_cohesion+" if args.verbose else "console_stderr-"
+    event_handlers = ["console_cohesion+"] if args.verbose else []
 
     if args.clean:
         print("--> Cleaning build directory...")
@@ -108,7 +108,7 @@ def build_dev_ws(project_dir, output_dir, build_type, verbose_makefile, event_ha
         "build",
         "--merge-install",
         "--event-handlers",
-        event_handlers,
+        *event_handlers,
         "--cmake-args",
         "-DBUILD_TESTING=OFF",
         "-DCAKE_C_COMPILER=gcc",
@@ -227,7 +227,7 @@ def build_mcu_ws(
         "--metas",
         *metas,
         "--event-handlers",
-        event_handlers,
+        *event_handlers,
         "--cmake-args",
         "--no-warn-unused-cli",
         "-DBUILD_SHARED_LIBS=OFF",
