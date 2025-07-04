@@ -44,8 +44,9 @@ def main():
     parser.add_argument(
         "-e",
         "--extra-packages",
+        action="append",
         default=None,
-        help="Path to repos file with extra packages to import",
+        help="Path to repos file with extra packages to import or directory with package sources (can be used multiple times)",
     )
     args = parser.parse_args()
 
@@ -55,8 +56,10 @@ def main():
         Path(args.toolchain_file).resolve() if args.toolchain_file else None
     )
     colcon_meta_file = Path(args.colcon_meta).resolve() if args.colcon_meta else None
-    extra_packages_file = (
-        Path(args.extra_packages).resolve() if args.extra_packages else None
+    extra_packages_files = (
+        [Path(f).resolve() for f in args.extra_packages]
+        if args.extra_packages
+        else None
     )
 
     build_type = "Debug" if args.debug else "Release"
@@ -79,7 +82,7 @@ def main():
         event_handlers,
         toolchain_file,
         colcon_meta_file,
-        extra_packages_file,
+        extra_packages_files,
     )
 
     print("--> Generating CMake config...")
@@ -124,7 +127,7 @@ def build_mcu_ws(
     event_handlers,
     toolchain_file=None,
     colcon_meta_file=None,
-    extra_packages_file=None,
+    extra_packages_files=None,
 ):
     mcu_ws_dir = output_dir / "mcu_ws"
     os.makedirs(mcu_ws_dir / "src", exist_ok=True)
@@ -139,20 +142,33 @@ def build_mcu_ws(
     ]
     subprocess.run(vcs_import_cmd, check=True)
 
-    if extra_packages_file:
+    if extra_packages_files:
         extra_src_dir = mcu_ws_dir / "src" / "extra"
         os.makedirs(extra_src_dir, exist_ok=True)
-        print(
-            f"--> Importing extra repos from {extra_packages_file} into {extra_src_dir} ..."
-        )
-        vcs_import_extra_cmd = [
-            "vcs",
-            "import",
-            "--input",
-            extra_packages_file,
-            str(extra_src_dir),
-        ]
-        subprocess.run(vcs_import_extra_cmd, check=True)
+        for extra_packages_path in extra_packages_files:
+            if extra_packages_path.is_dir():
+                print(
+                    f"--> Copying package sources from {extra_packages_path} into {extra_src_dir} ..."
+                )
+                # Copy all subdirectories from the source directory
+                for item in extra_packages_path.iterdir():
+                    if item.is_dir():
+                        dest_path = extra_src_dir / item.name
+                        if dest_path.exists():
+                            shutil.rmtree(dest_path)
+                        shutil.copytree(item, dest_path)
+            else:
+                print(
+                    f"--> Importing extra repos from {extra_packages_path} into {extra_src_dir} ..."
+                )
+                vcs_import_extra_cmd = [
+                    "vcs",
+                    "import",
+                    "--input",
+                    str(extra_packages_path),
+                    str(extra_src_dir),
+                ]
+                subprocess.run(vcs_import_extra_cmd, check=True)
 
     colcon_ignore_packages = [
         "rcl_lifecycle",
