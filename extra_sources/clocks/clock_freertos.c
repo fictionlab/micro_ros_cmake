@@ -30,3 +30,13 @@ int clock_gettime(int clock_id, struct timespec *tp) {
 
   return 0;
 }
+
+int gettimeofday(struct timeval *tv, void * __tz) {
+  struct timespec tp;
+  clock_gettime(0, &tp);
+
+  tv->tv_sec = tp.tv_sec;
+  tv->tv_usec = (suseconds_t)(tp.tv_nsec / NANOSECONDS_PER_MICROSECOND);
+
+  return 0;
+}
